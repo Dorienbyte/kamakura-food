@@ -1,54 +1,53 @@
-import { products } from './data.js';
+import { filters, products } from './data.js';
 
-const productsContainer = document.getElementById('products');
+document.addEventListener('DOMContentLoaded', () => {
+    const contenedorFiltros = document.querySelector('#filters');
+    const contenedorProductos = document.querySelector('#products');
 
-function printMenu(menuList) {
-    // Limpiamos el contenedor
-    productsContainer.innerHTML = '';
-    
-    // Recorremos la lista de platos
-    menuList.forEach((product) => {
-        productsContainer.innerHTML += `
-            <div class="product-container">
-                <h3>${product.name}</h3>
-                <p>${product.description}</p>
-                <div class="price-container">
-                    <h5>${product.price.toFixed(2)} €</h5>
-                    <button class="add-button" data-id="${product.id}">Añadir</button>
-                </div>
-            </div>
-        `;
+    filters.forEach(categoria => {
+        const boton = document.createElement('button');
+        boton.classList.add('filter');
+        boton.setAttribute('data-category', categoria);
+        
+        if (categoria === 'todos') {
+            boton.textContent = 'Todos';
+        } else {
+            boton.textContent = categoria.charAt(0).toUpperCase() + categoria.slice(1);
+        }
+        contenedorFiltros.appendChild(boton); 
     });
-}
 
-// Ejecutamos la función para pintar los platos por primera vez
-printMenu(products);
+    function pintarPlatos(listaDePlatos) {
+        contenedorProductos.innerHTML = '';
 
-// =========================================================
-// NUEVO CÓDIGO: LOS FILTROS (¡Lo que nos faltaba pegar!)
-// =========================================================
-
-// 1. Apuntamos a la caja de los botones en el HTML
-const filtersContainer = document.getElementById('filters');
-
-// 2. Creamos el colador
-function filterProducts(category) {
-    // Ponemos el chivato para ver qué categoría llega
-    console.log("Has pulsado la categoría:", category);
-
-    if (category === 'all') {
-        printMenu(products);
-        return;
+        listaDePlatos.forEach(plato => {
+            const tarjeta = document.createElement('div');
+            tarjeta.classList.add('product-container');
+            
+            tarjeta.innerHTML = `
+                <h3>${plato.name}</h3>
+                <p>${plato.description}</p>
+                <div class="price-container">
+                    <h5>${plato.price} €</h5>
+                    <button class="add-button" data-id="${plato.id}">Añadir</button>
+                </div>
+            `;
+            contenedorProductos.appendChild(tarjeta);
+        });
     }
 
-    const filteredList = products.filter(product => product.category === category);
-    printMenu(filteredList);
-}
+    contenedorFiltros.addEventListener('click', (evento) => {
+        if (evento.target.classList.contains('filter')) {
+            const categoriaSeleccionada = evento.target.getAttribute('data-category');
+            
+            if (categoriaSeleccionada === 'todos') {
+                pintarPlatos(products);
+            } else {
+                const platosFiltrados = products.filter(plato => plato.category === categoriaSeleccionada);
+                pintarPlatos(platosFiltrados);
+            }
+        }
+    });
 
-// 3. Conectamos el cable detector de clics
-filtersContainer.addEventListener('click', (event) => {
-    if (event.target.classList.contains('filter')) {
-        const selectedCategory = event.target.getAttribute('data-category');
-        filterProducts(selectedCategory);
-    }
+    pintarPlatos(products);
 });
